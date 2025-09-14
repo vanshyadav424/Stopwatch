@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Animated Stopwatch</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #0f2027;  /* Dark blue gradient */
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            position: relative;
+        }
+
+        /* Floating animated circles in the background */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: float 20s infinite linear;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            100% { transform: translateY(-1000px) translateX(1000px); }
+        }
+
+        .circle:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 20%;
+            left: 10%;
+            animation-duration: 25s;
+        }
+
+        .circle:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            top: 70%;
+            left: 80%;
+            animation-duration: 30s;
+        }
+
+        .circle:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            left: 30%;
+            animation-duration: 20s;
+        }
+
+        .stopwatch {
+            position: relative;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            text-align: center;
+            z-index: 10;
+        }
+
+        #display {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            letter-spacing: 3px;
+            animation: pulse 1.5s infinite;
+            color: #00ffd5;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        button {
+            padding: 14px 30px;
+            margin: 10px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #00ffd5;
+            color: #000;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        button:hover {
+            background-color: #00e6c2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.7);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background-color: #333;
+            border-radius: 6px;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background-color: #00ffd5;
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Floating circles for animated background effect -->
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+
+    <div class="stopwatch">
+        <div id="display">00:00:00</div>
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <button id="reset">Reset</button>
+
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+    </div>
+
+    <script>
+        let startTime;
+        let elapsedTime = 0;
+        let timerInterval;
+
+        const display = document.getElementById('display');
+        const startButton = document.getElementById('start');
+        const stopButton = document.getElementById('stop');
+        const resetButton = document.getElementById('reset');
+        const progressBar = document.getElementById('progress');
+
+        function timeToString(time) {
+            let diffInHrs = Math.floor(time / 3600000);
+            let diffInMin = Math.floor((time % 3600000) / 60000);
+            let diffInSec = Math.floor((time % 60000) / 1000);
+
+            let formattedHrs = diffInHrs.toString().padStart(2, "0");
+            let formattedMin = diffInMin.toString().padStart(2, "0");
+            let formattedSec = diffInSec.toString().padStart(2, "0");
+
+            return `${formattedHrs}:${formattedMin}:${formattedSec}`;
+        }
+
+        function updateProgress() {
+            let seconds = Math.floor((elapsedTime / 1000) % 60);
+            let percent = (seconds / 60) * 100;
+            progressBar.style.width = `${percent}%`;
+        }
+
+        function start() {
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(function printTime() {
+                elapsedTime = Date.now() - startTime;
+                display.textContent = timeToString(elapsedTime);
+                updateProgress();
+            }, 1000);
+
+            startButton.disabled = true;
+        }
+
+        function stop() {
+            clearInterval(timerInterval);
+            startButton.disabled = false;
+        }
+
+        function reset() {
+            clearInterval(timerInterval);
+            display.textContent = "00:00:00";
+            elapsedTime = 0;
+            progressBar.style.width = "0%";
+            startButton.disabled = false;
+        }
+
+        startButton.addEventListener('click', start);
+        stopButton.addEventListener('click', stop);
+        resetButton.addEventListener('click', reset);
+    </script>
+
+</body>
+
+</html>
